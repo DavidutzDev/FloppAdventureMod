@@ -1,0 +1,185 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+buildscript {
+    dependencies {
+        classpath 'org.spongepowered:mixingradle:0.7.+'
+    }
+}
+
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'java'
+    id 'eclipse'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+}
+
+apply plugin: 'org.spongepowered.mixin'
+
+version = '1.0'
+group = 'fr.davidutz.floppadventuremod'
+archivesBaseName = 'floppadventuremod'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+
+mixin {
+    add sourceSets.main, 'mixins.floppadventuremod.refmap.json'
+    config 'mixins.floppadventuremod.json'
+
+    debug.verbose = true
+    debug.export = true
+}
+
+minecraft {
+    mappings channel: 'parchment', version: '2022.08.14-1.19.2'
+
+    runs {
+        client {
+            workingDirectory project.file('run/client')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', 'examplemod'
+
+            arg '-mixin.config=mixins.floppadventuremod.json'
+
+            mods {
+                examplemod {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run/server')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            property 'forge.enabledGameTestNamespaces', 'examplemod'
+
+            mods {
+                examplemod {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        gameTestServer {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            property 'forge.enabledGameTestNamespaces', 'examplemod'
+
+            mods {
+                examplemod {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            args '--mod', 'floppadventuremod', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            mods {
+                floppadventuremod {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+configurations {
+    shade
+    implementation.extendsFrom shade
+    clientShade
+    implementation.extendsFrom clientShade
+    serverShade
+    implementation.extendsFrom serverShade
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.19.2-43.3.0'
+    implementation 'org.jetbrains:annotations:23.0.0'
+
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+jar {
+    manifest {
+        attributes([
+                "Specification-Title"     : "floppadventuremod",
+                "Specification-Vendor"    : "floppadventuremodutz",
+                "Specification-Version"   : "1",
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : project.jar.archiveVersion,
+                "Implementation-Vendor"   : "floppadventuremodutz",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+task clientJar(type: ShadowJar) {
+    configurations = [project.configurations.shade]
+    configurations.add(project.configurations.clientShade)
+    from sourceSets.main.output
+    group 'build'
+    exclude 'fr/davidutz/floppadventuremod/server/**'
+    exclude 'fr/davidutz/floppadventuremod/mixins/server/**'
+    classifier 'client'
+}
+
+task serverJar(type: ShadowJar) {
+    configurations = [project.configurations.shade]
+    configurations.add(project.configurations.serverShade)
+    from sourceSets.main.output
+    group 'build'
+    exclude 'fr/davidutz/floppadventuremod/client/**'
+    exclude 'fr/davidutz/floppadventuremod/mixins/client/**'
+    exclude 'club/minnced/discord/**'
+    classifier 'server'
+}
+
+reobf {
+    clientJar {}
+    serverJar {}
+}
+
+jar.finalizedBy('reobfJar')
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}

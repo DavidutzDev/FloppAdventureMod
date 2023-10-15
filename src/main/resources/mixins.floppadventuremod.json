@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "fr.davidutz.floppadventuremod.mixins",
+  "minVersion": "JAVA_17",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "client.MixinLoadingOverlay",
+    "client.MixinWindow"
+  ],
+  "server": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "mixins.floppadventuremod.refmap.json"
+}
