@@ -47,7 +47,7 @@ minecraft {
             arg '-mixin.config=mixins.floppadventuremod.json'
 
             mods {
-                examplemod {
+                floppadventuremod {
                     source sourceSets.main
                 }
             }
@@ -63,7 +63,7 @@ minecraft {
             property 'forge.enabledGameTestNamespaces', 'examplemod'
 
             mods {
-                examplemod {
+                floppadventuremod {
                     source sourceSets.main
                 }
             }
@@ -79,7 +79,7 @@ minecraft {
             property 'forge.enabledGameTestNamespaces', 'examplemod'
 
             mods {
-                examplemod {
+                floppadventuremod {
                     source sourceSets.main
                 }
             }
@@ -114,13 +114,19 @@ configurations {
 
 repositories {
     mavenCentral()
+    jcenter()
+    maven {
+        url 'https://jitpack.io'
+    }
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.2-43.3.0'
+    minecraft 'net.minecraftforge:forge:1.19.2-43.0.0'
     implementation 'org.jetbrains:annotations:23.0.0'
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+    implementation 'com.github.MinnDevelopment:java-discord-rpc:v2.0.2'
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
@@ -128,13 +134,16 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 jar {
     manifest {
         attributes([
-                "Specification-Title"     : "floppadventuremod",
-                "Specification-Vendor"    : "floppadventuremodutz",
-                "Specification-Version"   : "1",
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : project.jar.archiveVersion,
-                "Implementation-Vendor"   : "floppadventuremodutz",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+                "Specification-Title": "floppadventuremod",
+                "Specification-Vendor": "floppadventuremodvendor",
+                "Specification-Version": "1", // We are version 1 of ourselves
+                "Implementation-Title": project.name,
+                "Implementation-Version": "${version}",
+                "Implementation-Vendor" :"floppadventuremodvendor",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
+                'MixinConfigs': 'floppadventuremod.mixin.json',
+                'FMLCorePluginContainsFMLMod': 'true',
         ])
     }
 }
@@ -143,9 +152,10 @@ task clientJar(type: ShadowJar) {
     configurations = [project.configurations.shade]
     configurations.add(project.configurations.clientShade)
     from sourceSets.main.output
-    group 'build'
+    group 'floppa runs'
     exclude 'fr/davidutz/floppadventuremod/server/**'
     exclude 'fr/davidutz/floppadventuremod/mixins/server/**'
+    exclude 'com/sun/**'
     classifier 'client'
 }
 
@@ -153,7 +163,7 @@ task serverJar(type: ShadowJar) {
     configurations = [project.configurations.shade]
     configurations.add(project.configurations.serverShade)
     from sourceSets.main.output
-    group 'build'
+    group 'floppa runs'
     exclude 'fr/davidutz/floppadventuremod/client/**'
     exclude 'fr/davidutz/floppadventuremod/mixins/client/**'
     exclude 'club/minnced/discord/**'
