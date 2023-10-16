@@ -1,14 +1,27 @@
 modLoader="javafml"
 loaderVersion="[43,)"
 license="All rights reserved, (c) Davidutz 2023"
+
 [[mods]]
 modId="floppadventuremod"
-version="1.0.0"
+version="1.0"
 displayName="FloppAdventure Mod"
+displayURL="https://github.com/DavidutzDev/FloppAdventureMod"
 logoFile="icon.png"
-credits="Davidutz & Retrix_Off"
 authors="Davidutz for development, Retrix_Off for textures"
-
 description='''
 FloppAdventure Mod, Official mod for FloppAdventure server
 '''
+
+[[dependencies.floppadventuremod]]
+modId="forge"
+mandatory=true
+versionRange="[43,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.floppadventuremod]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.19.2,)"
+ordering="NONE"
+side="BOTH"
