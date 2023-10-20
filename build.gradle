@@ -126,7 +126,7 @@ dependencies {
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    implementation 'com.github.MinnDevelopment:java-discord-rpc:v2.0.2'
+    clientShade 'com.github.MinnDevelopment:java-discord-rpc:v2.0.2'
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
